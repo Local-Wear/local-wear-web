@@ -7,6 +7,7 @@ export const products = [
       rating: 4.5,
       reviews: 128,
       image: "/assets/p_img2.png",
+      hoverImage: "/assets/p_img4.png",
       discount: 20,
     },
     {
@@ -16,6 +17,7 @@ export const products = [
       rating: 4.8,
       reviews: 89,
       image: "/assets/p_img3.png",
+      hoverImage: "/assets/p_img2.png",
     },
     {
       id: 3,
@@ -25,6 +27,7 @@ export const products = [
       rating: 4.3,
       reviews: 67,
       image: "/assets/p_img4.png",
+      hoverImage: "/assets/p_img3.png",
       discount: 25,
     },
     {
@@ -34,6 +37,7 @@ export const products = [
       rating: 4.7,
       reviews: 156,
       image: "/assets/p_img5.png",
+      hoverImage: "/assets/p_img6.png",
     },
     {
       id: 5,
@@ -43,6 +47,7 @@ export const products = [
       rating: 4.4,
       reviews: 203,
       image: "/assets/p_img6.png",
+      hoverImage: "/assets/p_img2.png",
       discount: 20,
     },
     {
