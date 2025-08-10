@@ -1,13 +1,12 @@
 import { inject, injectable } from 'tsyringe';
 import { Context } from 'hono';
 import { sendSuccess } from '../common/api-response';
-import type { IHealthService, IHealthController } from '../interfaces/health.interface';
-import { SERVICE_TOKENS } from '../common/tokens';
+import { HealthService } from '../services/health.service';
 
 @injectable()
-export class HealthController implements IHealthController {
+export class HealthController {
   constructor(
-    @inject(SERVICE_TOKENS.Health) private healthService: IHealthService
+    @inject('HealthService') private healthService: HealthService
   ) {}
 
   /**

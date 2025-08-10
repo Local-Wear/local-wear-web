@@ -1,14 +1,13 @@
 import { Hono } from 'hono';
-import { getInstance } from '../container.config';
-import { CONTROLLER_TOKENS } from '../common/tokens';
-import type { IHealthController } from '../interfaces/health.interface';
+import { container } from '../container';
+import { HealthController } from '../controllers/health.controller';
 import type { Variables, Bindings } from '../factory';
 
 type HonoApp = Hono<{ Variables: Variables; Bindings: Bindings }>;
 
 export const createHealthRoutes = (app: HonoApp) => {
   // Resolve controller from DI container using type-safe token
-  const healthController = getInstance<IHealthController>(CONTROLLER_TOKENS.Health);
+  const healthController = container.resolve(HealthController);
   
   // Basic ping endpoint
   app.get('/ping', (c) => healthController.ping(c));

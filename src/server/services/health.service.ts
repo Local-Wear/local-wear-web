@@ -1,12 +1,29 @@
 import { inject, injectable } from 'tsyringe';
+import { HealthRepository } from '../repositories/health.repository';
 import { SystemHealth } from '../repositories/interfaces/base.interface';
-import type { IHealthRepository, IHealthService, PingResponse, ReadinessResponse, LivenessResponse } from '../interfaces/health.interface';
-import { REPOSITORY_TOKENS } from '../common/tokens';
+
+export interface PingResponse {
+  message: string;
+  timestamp: string;
+  requestId: string;
+}
+
+export interface ReadinessResponse {
+  ready: boolean;
+  timestamp: string;
+  requestId: string;
+}
+
+export interface LivenessResponse {
+  alive: boolean;
+  timestamp: string;
+  requestId: string;
+}
 
 @injectable()
-export class HealthService implements IHealthService {
+export class HealthService {
   constructor(
-    @inject(REPOSITORY_TOKENS.Health) private healthRepository: IHealthRepository
+    @inject('HealthRepository') private readonly healthRepository: HealthRepository
   ) {}
 
   async ping(requestId: string): Promise<PingResponse> {

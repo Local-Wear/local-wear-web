@@ -1,8 +1,7 @@
 import { inject, injectable } from 'tsyringe';
+import { DatabaseConnection } from '../database/connection';
 import { systemLogs, NewSystemLog } from '../database/schema';
 import { eq } from 'drizzle-orm';
-import type { IDatabaseConnection, IDatabaseRepository } from '../interfaces/database.interface';
-import { TOKENS } from '../common/tokens';
 
 export interface DatabaseHealthInfo {
   connected: boolean;
@@ -18,9 +17,9 @@ export interface DatabaseHealthInfo {
 }
 
 @injectable()
-export class DatabaseRepository implements IDatabaseRepository {
+export class DatabaseRepository {
   constructor(
-    @inject(TOKENS.Connection) private databaseConnection: IDatabaseConnection
+    @inject('DatabaseConnection') private databaseConnection: DatabaseConnection
   ) {}
 
   /**

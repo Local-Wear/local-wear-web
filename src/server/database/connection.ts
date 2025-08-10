@@ -1,7 +1,6 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { injectable } from 'tsyringe';
-import { IDatabaseConnection } from '../interfaces/database.interface';
 
 // Database configuration interface
 export interface DatabaseConfig {
@@ -48,7 +47,8 @@ const getDatabaseConfig = (): DatabaseConfig => {
 };
 
 @injectable()
-export class DatabaseConnection implements IDatabaseConnection {
+export class DatabaseConnection {
+  private static instance: DatabaseConnection;
   private client!: postgres.Sql;
   private db!: ReturnType<typeof drizzle>;
   private config: DatabaseConfig;
@@ -157,10 +157,16 @@ export class DatabaseConnection implements IDatabaseConnection {
    * Get singleton instance
    */
   /**
-   * Initialize a new database connection
-   * Note: TSyringe will manage the singleton lifecycle
+   * Get singleton instance
    */
-  public static create(): DatabaseConnection {
-    return new DatabaseConnection();
+  public static getInstance(): DatabaseConnection {
+    if (!DatabaseConnection.instance) {
+      DatabaseConnection.instance = new DatabaseConnection();
+    }
+    return DatabaseConnection.instance;
   }
 }
+
+// Export singleton instance for backward compatibility
+export const databaseConnection = DatabaseConnection.getInstance();
+export const db = databaseConnection.getDb();

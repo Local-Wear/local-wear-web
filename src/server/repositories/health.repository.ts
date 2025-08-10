@@ -1,13 +1,19 @@
 import { inject, injectable } from 'tsyringe';
-import { SystemHealth } from './interfaces/base.interface';
-import type { IDatabaseRepository } from '../interfaces/database.interface';
-import type { IHealthRepository, DatabaseInfo } from '../interfaces/health.interface';
-import { TOKENS } from '../common/tokens';
+import { IHealthRepository, SystemHealth } from './interfaces/base.interface';
+import { DatabaseRepository, DatabaseHealthInfo } from './database.repository';
+
+interface DatabaseInfo extends DatabaseHealthInfo {
+  stats: {
+    totalConnections: number;
+    activeConnections: number;
+    databaseSize: string;
+  };
+}
 
 @injectable()
 export class HealthRepository implements IHealthRepository {
   constructor(
-    @inject(TOKENS.Database) private databaseRepository: IDatabaseRepository
+    @inject('DatabaseRepository') private databaseRepository: DatabaseRepository
   ) {}
 
   async getSystemHealth(): Promise<SystemHealth> {

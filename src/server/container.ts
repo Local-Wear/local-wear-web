@@ -1,11 +1,18 @@
-/**
- * @deprecated Use container.config.ts instead
- * This file is kept for backward compatibility
- */
-import { container, initializeContainer } from './container.config';
+import 'reflect-metadata';
+import { container } from 'tsyringe';
+import { DatabaseConnection } from './database/connection';
+import { DatabaseRepository } from './repositories/database.repository';
+import { HealthRepository } from './repositories/health.repository';
+import { HealthService } from './services/health.service';
 
-// Initialize container for backward compatibility
-initializeContainer();
+// Register database connection
+container.registerSingleton('DatabaseConnection', DatabaseConnection);
+
+// Register repositories
+container.registerSingleton('DatabaseRepository', DatabaseRepository);
+container.registerSingleton('HealthRepository', HealthRepository);
+
+// Register services
+container.registerSingleton('HealthService', HealthService);
 
 export { container };
-export { initializeContainer };

@@ -1,13 +1,10 @@
 import 'reflect-metadata';
 import { handle } from 'hono/vercel';
-import { createApp } from '@/server/factory';
-import { apiKeyMiddleware } from '@/server/middleware/api-key';
-import { createHealthRoutes } from '@/server/routes/health.routes';
-import { initializeContainer } from '@/server/container.config';
+import '../../../server/container';
+import { createApp } from '../../../server/factory';
+import { apiKeyMiddleware } from '../../../server/middleware/api-key';
+import { createHealthRoutes } from '../../../server/routes/health.routes';
 export const runtime = 'nodejs';
-
-// Initialize dependency injection container
-initializeContainer();
 
 const app = createApp().basePath('/api');
 app.use('*', apiKeyMiddleware);
