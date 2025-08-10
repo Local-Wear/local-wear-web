@@ -1,7 +1,7 @@
-import { inject, injectable } from 'tsyringe';
-import { DatabaseConnection } from '../database/connection';
-import { systemLogs, NewSystemLog } from '../database/schema';
 import { eq } from 'drizzle-orm';
+import { injectable } from 'tsyringe';
+import { DatabaseConnection } from '../database/connection';
+import { NewSystemLog, systemLogs } from '../database/schema';
 
 export interface DatabaseHealthInfo {
   connected: boolean;
@@ -18,9 +18,7 @@ export interface DatabaseHealthInfo {
 
 @injectable()
 export class DatabaseRepository {
-  constructor(
-    @inject('DatabaseConnection') private databaseConnection: DatabaseConnection
-  ) {}
+  constructor(private databaseConnection: DatabaseConnection) {}
 
   /**
    * Test database connection health
@@ -28,7 +26,7 @@ export class DatabaseRepository {
   async checkHealth(): Promise<DatabaseHealthInfo> {
     const connected = await this.databaseConnection.testConnection();
     const rawConnectionInfo = this.databaseConnection.getConnectionInfo();
-    
+
     const connectionInfo = {
       host: rawConnectionInfo.host,
       port: rawConnectionInfo.port,
@@ -37,7 +35,7 @@ export class DatabaseRepository {
       ssl: rawConnectionInfo.ssl ?? false,
       maxConnections: rawConnectionInfo.maxConnections ?? 20,
     };
-    
+
     return {
       connected,
       connectionInfo,
@@ -61,14 +59,10 @@ export class DatabaseRepository {
   /**
    * Get recent system logs
    */
-  async getRecentLogs(limit: number = 100): Promise<typeof systemLogs.$inferSelect[]> {
+  async getRecentLogs(limit: number = 100): Promise<(typeof systemLogs.$inferSelect)[]> {
     try {
       const db = this.databaseConnection.getDb();
-      return await db
-        .select()
-        .from(systemLogs)
-        .orderBy(systemLogs.createdAt)
-        .limit(limit);
+      return await db.select().from(systemLogs).orderBy(systemLogs.createdAt).limit(limit);
     } catch (error) {
       console.error('Failed to fetch system logs:', error);
       return [];
@@ -78,7 +72,7 @@ export class DatabaseRepository {
   /**
    * Get logs by request ID for tracing
    */
-  async getLogsByRequestId(requestId: string): Promise<typeof systemLogs.$inferSelect[]> {
+  async getLogsByRequestId(requestId: string): Promise<(typeof systemLogs.$inferSelect)[]> {
     try {
       const db = this.databaseConnection.getDb();
       return await db
@@ -100,10 +94,10 @@ export class DatabaseRepository {
       const client = this.databaseConnection.getClient();
       const [versionResult] = await client`SELECT version() as version`;
       const [uptimeResult] = await client`
-        SELECT 
+        SELECT
           EXTRACT(EPOCH FROM (now() - pg_postmaster_start_time())) as uptime_seconds
       `;
-      
+
       return {
         version: versionResult.version,
         uptime: `${Math.floor(uptimeResult.uptime_seconds)}s`,
@@ -124,17 +118,17 @@ export class DatabaseRepository {
   }> {
     try {
       const client = this.databaseConnection.getClient();
-      
+
       const [connectionStats] = await client`
-        SELECT 
+        SELECT
           (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') as total_connections,
           (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') as active_connections
       `;
-      
+
       const [sizeStats] = await client`
         SELECT pg_size_pretty(pg_database_size(current_database())) as database_size
       `;
-      
+
       return {
         totalConnections: connectionStats.total_connections,
         activeConnections: connectionStats.active_connections,

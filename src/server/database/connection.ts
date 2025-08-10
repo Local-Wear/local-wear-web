@@ -17,7 +17,7 @@ export interface DatabaseConfig {
 // Get database configuration from environment variables
 const getDatabaseConfig = (): DatabaseConfig => {
   const databaseUrl = process.env.DATABASE_URL;
-  
+
   if (databaseUrl) {
     // Parse DATABASE_URL if provided
     const url = new URL(databaseUrl);
@@ -29,7 +29,7 @@ const getDatabaseConfig = (): DatabaseConfig => {
       password: url.password,
       ssl: url.searchParams.get('sslmode') === 'require',
       maxConnections: parseInt(process.env.DB_MAX_CONNECTIONS || '20'),
-      idleTimeout: parseInt(process.env.DB_IDLE_TIMEOUT || '30')
+      idleTimeout: parseInt(process.env.DB_IDLE_TIMEOUT || '30'),
     };
   }
 
@@ -42,13 +42,12 @@ const getDatabaseConfig = (): DatabaseConfig => {
     password: process.env.DB_PASSWORD || '',
     ssl: process.env.DB_SSL === 'true',
     maxConnections: parseInt(process.env.DB_MAX_CONNECTIONS || '20'),
-    idleTimeout: parseInt(process.env.DB_IDLE_TIMEOUT || '30')
+    idleTimeout: parseInt(process.env.DB_IDLE_TIMEOUT || '30'),
   };
 };
 
 @injectable()
 export class DatabaseConnection {
-  private static instance: DatabaseConnection;
   private client!: postgres.Sql;
   private db!: ReturnType<typeof drizzle>;
   private config: DatabaseConfig;
@@ -73,21 +72,23 @@ export class DatabaseConnection {
         // Connection pool settings
         connect_timeout: 10, // 10 seconds
         prepare: false, // Disable prepared statements for better compatibility
-        onnotice: (notice) => {
+        onnotice: notice => {
           console.log('PostgreSQL notice:', notice);
         },
-        debug: process.env.NODE_ENV === 'development'
+        debug: process.env.NODE_ENV === 'development',
       });
 
       // Initialize Drizzle ORM
       this.db = drizzle(this.client, {
-        logger: process.env.NODE_ENV === 'development'
+        logger: process.env.NODE_ENV === 'development',
       });
 
       console.log('✅ Database connection initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize database connection:', error);
-      throw new Error(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -134,7 +135,7 @@ export class DatabaseConnection {
       database: this.config.database,
       username: this.config.username,
       ssl: this.config.ssl,
-      maxConnections: this.config.maxConnections
+      maxConnections: this.config.maxConnections,
     };
   }
 
@@ -152,21 +153,4 @@ export class DatabaseConnection {
       throw error;
     }
   }
-
-  /**
-   * Get singleton instance
-   */
-  /**
-   * Get singleton instance
-   */
-  public static getInstance(): DatabaseConnection {
-    if (!DatabaseConnection.instance) {
-      DatabaseConnection.instance = new DatabaseConnection();
-    }
-    return DatabaseConnection.instance;
-  }
 }
-
-// Export singleton instance for backward compatibility
-export const databaseConnection = DatabaseConnection.getInstance();
-export const db = databaseConnection.getDb();

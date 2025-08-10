@@ -1,6 +1,6 @@
-import { inject, injectable } from 'tsyringe';
+import { injectable } from 'tsyringe';
+import { DatabaseHealthInfo, DatabaseRepository } from './database.repository';
 import { IHealthRepository, SystemHealth } from './interfaces/base.interface';
-import { DatabaseRepository, DatabaseHealthInfo } from './database.repository';
 
 interface DatabaseInfo extends DatabaseHealthInfo {
   stats: {
@@ -12,14 +12,12 @@ interface DatabaseInfo extends DatabaseHealthInfo {
 
 @injectable()
 export class HealthRepository implements IHealthRepository {
-  constructor(
-    @inject('DatabaseRepository') private databaseRepository: DatabaseRepository
-  ) {}
+  constructor(private databaseRepository: DatabaseRepository) {}
 
   async getSystemHealth(): Promise<SystemHealth> {
     const uptime = process.uptime();
     const memoryUsage = process.memoryUsage();
-    
+
     // Check database health
     let databaseStatus = 'healthy';
     try {
@@ -31,7 +29,7 @@ export class HealthRepository implements IHealthRepository {
       console.error('Database health check failed:', error);
       databaseStatus = 'unhealthy';
     }
-    
+
     return {
       status: databaseStatus === 'healthy' ? 'healthy' : 'unhealthy',
       uptime: `${Math.floor(uptime)}s`,
@@ -64,7 +62,7 @@ export class HealthRepository implements IHealthRepository {
         this.databaseRepository.checkHealth(),
         this.databaseRepository.getDatabaseStats(),
       ]);
-      
+
       return {
         ...dbHealth,
         stats: dbStats,

@@ -5,6 +5,7 @@ import { createFactory } from 'hono/factory';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { secureHeaders } from 'hono/secure-headers';
+import { errorHandler } from './middleware/error-handler';
 
 export interface Variables {
   lang: string;
@@ -29,6 +30,7 @@ export const createBaseApp = () => {
   app.use('*', cors());
   app.use('*', secureHeaders());
   app.use('*', prettyJSON());
+  app.use('*', errorHandler);
 
   app.use('*', async (c, next) => {
     const requestId = crypto.randomUUID();

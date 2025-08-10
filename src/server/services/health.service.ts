@@ -1,4 +1,4 @@
-import { inject, injectable } from 'tsyringe';
+import { injectable } from 'tsyringe';
 import { HealthRepository } from '../repositories/health.repository';
 import { SystemHealth } from '../repositories/interfaces/base.interface';
 
@@ -22,9 +22,7 @@ export interface LivenessResponse {
 
 @injectable()
 export class HealthService {
-  constructor(
-    @inject('HealthRepository') private readonly healthRepository: HealthRepository
-  ) {}
+  constructor(private readonly healthRepository: HealthRepository) {}
 
   async ping(requestId: string): Promise<PingResponse> {
     return {
@@ -45,7 +43,7 @@ export class HealthService {
   async checkReadiness(requestId: string): Promise<ReadinessResponse> {
     // Add any readiness checks here (database connectivity, external services, etc.)
     const isDatabaseConnected = await this.healthRepository.checkDatabaseConnection();
-    
+
     return {
       ready: isDatabaseConnected,
       timestamp: new Date().toISOString(),

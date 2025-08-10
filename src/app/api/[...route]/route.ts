@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { handle } from 'hono/vercel';
 import '../../../server/container';
 import { createApp } from '../../../server/factory';
@@ -11,7 +10,6 @@ app.use('*', apiKeyMiddleware);
 
 // Register health routes
 createHealthRoutes(app);
-
 
 export const GET = handle(app);
 export const POST = handle(app);

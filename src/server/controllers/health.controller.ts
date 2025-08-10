@@ -1,13 +1,11 @@
-import { inject, injectable } from 'tsyringe';
 import { Context } from 'hono';
+import { injectable } from 'tsyringe';
 import { sendSuccess } from '../common/api-response';
 import { HealthService } from '../services/health.service';
 
 @injectable()
 export class HealthController {
-  constructor(
-    @inject('HealthService') private healthService: HealthService
-  ) {}
+  constructor(private healthService: HealthService) {}
 
   /**
    * Basic ping endpoint for health checks

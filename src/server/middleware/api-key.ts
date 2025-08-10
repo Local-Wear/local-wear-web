@@ -1,12 +1,8 @@
 import { Context, Next } from 'hono';
 import { sendApiResponse } from '../common/api-response';
+import { getConfig } from '../config/env';
 
-const API_KEY = process.env.API_KEY;
 const API_KEY_HEADER = 'x-api-key';
-
-if (!API_KEY) {
-  throw new Error('API_KEY environment variable is not set');
-}
 
 const rateLimit = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
@@ -14,10 +10,15 @@ const MAX_REQUESTS = 100;
 
 export const apiKeyMiddleware = async (c: Context, next: Next) => {
   const apiKey = c.req.header(API_KEY_HEADER);
+  const { API_KEY } = getConfig();
   const clientIp = c.req.header('x-forwarded-for') || 'unknown';
 
   if (!apiKey) {
     return sendApiResponse(c, 401, 'API key is required');
+  }
+
+  if (!API_KEY) {
+    return sendApiResponse(c, 500, 'Server misconfiguration: missing API key');
   }
 
   if (apiKey !== API_KEY) {
@@ -31,11 +32,7 @@ export const apiKeyMiddleware = async (c: Context, next: Next) => {
     if (now > clientRateLimit.resetTime) {
       rateLimit.set(clientIp, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
     } else if (clientRateLimit.count >= MAX_REQUESTS) {
-      return sendApiResponse(
-        c,
-        429,
-        'Too many requests. Please try again later.',
-      );
+      return sendApiResponse(c, 429, 'Too many requests. Please try again later.');
     } else {
       clientRateLimit.count++;
       rateLimit.set(clientIp, clientRateLimit);
