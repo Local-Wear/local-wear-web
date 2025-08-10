@@ -1,4 +1,4 @@
-import { injectable } from 'tsyringe';
+import { delay, inject, injectable } from 'tsyringe';
 import { DatabaseHealthInfo, DatabaseRepository } from './database.repository';
 import { IHealthRepository, SystemHealth } from './interfaces/base.interface';
 
@@ -12,7 +12,10 @@ interface DatabaseInfo extends DatabaseHealthInfo {
 
 @injectable()
 export class HealthRepository implements IHealthRepository {
-  constructor(private databaseRepository: DatabaseRepository) {}
+  constructor(
+    @inject(delay(() => DatabaseRepository))
+    private databaseRepository: DatabaseRepository
+  ) {}
 
   async getSystemHealth(): Promise<SystemHealth> {
     const uptime = process.uptime();

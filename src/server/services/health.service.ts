@@ -1,4 +1,4 @@
-import { injectable } from 'tsyringe';
+import { delay, inject, injectable } from 'tsyringe';
 import { HealthRepository } from '../repositories/health.repository';
 import { SystemHealth } from '../repositories/interfaces/base.interface';
 
@@ -22,7 +22,10 @@ export interface LivenessResponse {
 
 @injectable()
 export class HealthService {
-  constructor(private readonly healthRepository: HealthRepository) {}
+  constructor(
+    @inject(delay(() => HealthRepository))
+    private readonly healthRepository: HealthRepository
+  ) {}
 
   async ping(requestId: string): Promise<PingResponse> {
     return {

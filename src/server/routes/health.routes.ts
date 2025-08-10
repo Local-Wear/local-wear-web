@@ -1,25 +1,26 @@
 import { Hono } from 'hono';
+import { sendSuccess } from '../common/api-response';
 import { container } from '../container';
 import { HealthController } from '../controllers/health.controller';
-import type { Variables, Bindings } from '../factory';
+import type { Bindings, Variables } from '../factory';
 
 type HonoApp = Hono<{ Variables: Variables; Bindings: Bindings }>;
 
 export const createHealthRoutes = (app: HonoApp) => {
-  // Resolve controller from DI container using type-safe token
-  const healthController = container.resolve(HealthController);
-  
-  // Basic ping endpoint
-  app.get('/ping', (c) => healthController.ping(c));
-  
-  // Detailed health check
-  app.get('/health', (c) => healthController.healthCheck(c));
-  
-  // Kubernetes/Docker readiness probe
-  app.get('/ready', (c) => healthController.ready(c));
-  
-  // Kubernetes/Docker liveness probe
-  app.get('/live', (c) => healthController.live(c));
-  
+  // Resolve controller lazily per request to avoid initializing dependencies unnecessarily
+  const getController = () => container.resolve(HealthController);
+
+  app.get('/ping', c => {
+    const requestId = c.get('requestId') || 'unknown';
+    return sendSuccess(c, {
+      message: 'Pong!',
+      timestamp: new Date().toISOString(),
+      requestId,
+    });
+  });
+  app.get('/health', c => getController().healthCheck(c));
+  app.get('/ready', c => getController().ready(c));
+  app.get('/live', c => getController().live(c));
+
   return app;
 };

@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { injectable } from 'tsyringe';
+import { delay, inject, injectable } from 'tsyringe';
 import { DatabaseConnection } from '../database/connection';
 import { NewSystemLog, systemLogs } from '../database/schema';
 
@@ -18,7 +18,10 @@ export interface DatabaseHealthInfo {
 
 @injectable()
 export class DatabaseRepository {
-  constructor(private databaseConnection: DatabaseConnection) {}
+  constructor(
+    @inject(delay(() => DatabaseConnection))
+    private databaseConnection: DatabaseConnection
+  ) {}
 
   /**
    * Test database connection health
